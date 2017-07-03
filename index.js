@@ -43,19 +43,29 @@ module.exports = class ExternalLinksPlugin extends akasha.Plugin {
 
         config.pluginData(pluginName).blacklist = [];
         config.pluginData(pluginName).whitelist = [];
+        config.pluginData(pluginName).preferNofollow = true;
         config.pluginData(pluginName).targetBlank = false;
+        return this;
+    }
+
+    setPreferNofollow(config, nofollow) {
+        config.pluginData(pluginName).preferNofollow = nofollow;
+        return this;
     }
 
     addBlacklistEntry(config, entry) {
         config.pluginData(pluginName).blacklist.push(entry);
+        return this;
     }
 
     addWhitelistEntry(config, entry) {
         config.pluginData(pluginName).whitelist.push(entry);
+        return this;
     }
 
     setTargetBlank(config, blank) {
         config.pluginData(pluginName).targetBlank = blank;
+        return this;
     }
 };
 
@@ -85,10 +95,11 @@ class AnchorCleanup extends mahabhuta.Munger {
         var href     = $link.attr('href');
         var rel      = $link.attr('rel');
 
+        // We only act on the link if it is external -- has a PROTOCOL and HOST
         const urlP = url.parse(href, true, true);
         if (urlP.protocol || urlP.host) {
 
-            var donofollow = false;
+            var donofollow = config.pluginData(pluginName).preferNofollow;
 
             metadata.config.pluginData(pluginName).blacklist.forEach(function(re) {
                 if (urlP.hostname.match(re)) {
@@ -127,8 +138,9 @@ class AnchorCleanup extends mahabhuta.Munger {
 
 // TODO  2. Check if an extlink icon is present, if not insert it (if textual link)
 
+        }
 
-        } else return Promise.resolve("");
+        return Promise.resolve("");
     }
 }
 
