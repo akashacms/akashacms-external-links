@@ -43,6 +43,7 @@ module.exports = class ExternalLinksPlugin extends akasha.Plugin {
 
         config.pluginData(pluginName).blacklist = [];
         config.pluginData(pluginName).whitelist = [];
+        config.pluginData(pluginName).targetBlank = false;
     }
 
     addBlacklistEntry(config, entry) {
@@ -51,6 +52,10 @@ module.exports = class ExternalLinksPlugin extends akasha.Plugin {
 
     addWhitelistEntry(config, entry) {
         config.pluginData(pluginName).whitelist.push(entry);
+    }
+
+    setTargetBlank(config, blank) {
+        config.pluginData(pluginName).targetBlank = blank;
     }
 };
 
@@ -113,6 +118,10 @@ class AnchorCleanup extends mahabhuta.Munger {
                     }
                     $link.attr('rel', linkrel);
                 }
+            }
+
+            if (config.pluginData(pluginName).targetBlank) {
+                $link.attr('target', '_blank');
             }
 
 
