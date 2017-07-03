@@ -1,8 +1,9 @@
+
 /**
  *
- * Copyright 2015 David Herron
- * 
- * This file is part of AkashaCMS-external-links (http://akashacms.com/).
+ * Copyright 2017 David Herron
+ *
+ * This file is part of AkashaCMS-extlinks (http://akashacms.com/).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -17,9 +18,41 @@
  *  limitations under the License.
  */
 
-var util     = require('util');
-var url      = require('url');
-var async    = require('async');
+'use strict';
+
+const url      = require('url');
+const path     = require('path');
+const util     = require('util');
+const co       = require('co');
+const akasha   = require('akasharender');
+
+const log   = require('debug')('akasha:extlinks-plugin');
+const error = require('debug')('akasha:error-extlinks-plugin');
+
+const pluginName = "akashacms-extlinks";
+
+module.exports = class ExternalLinksPlugin extends akasha.Plugin {
+    constructor() {
+        super(pluginName);
+    }
+
+    configure(config) {
+        // this._config = config;
+        config.addAssetsDir(path.join(__dirname, 'assets'));
+        config.addMahabhuta(module.exports.mahabhuta);
+
+        config.pluginData(pluginName).blacklist = [];
+        config.pluginData(pluginName).whitelist = [];
+    }
+
+    addBlacklistEntry(config, entry) {
+        config.pluginData(pluginName).blacklist.push(entry);
+    }
+
+    addWhitelistEntry(config, entry) {
+        config.pluginData(pluginName).whitelist.push(entry);
+    }
+};
 
 /*
  * TODO
@@ -27,6 +60,9 @@ var async    = require('async');
  * 1. Pull in rel=nofollow from wherever it currently resides
  * 2. Support marker icon - before/after
  * 3. Support favicon - before/after
+ *
+ * These go into akashacms-affiliates:
+ *
  * 4. Manipulate Amazon links to add affiliate tag
  * 5. Manipulate eBay links to add affiliate tag
  * 6. Manipulate Linkshare links with affiliate coding
@@ -35,24 +71,61 @@ var async    = require('async');
  *
  */
 
+module.exports.mahabhuta = new mahabhuta.MahafuncArray("akashacms-extlinks", {});
 
-var logger;
-var akasha;
-var config;
+class AnchorCleanup extends mahabhuta.Munger {
+    get selector() { return "html body a"; }
 
-/**
- * Add ourselves to the config data.
- **/
-module.exports.config = function(_akasha, _config) {
-	akasha = _akasha;
-	config = _config;
-	logger = akasha.getLogger("external-links");
-    // config.root_partials.push(path.join(__dirname, 'partials'));
-    // config.root_assets.unshift(path.join(__dirname, 'assets'));
-    
-    if (config.externalLinks) {
-        // TODO
+    process($, $link, metadata, dirty, done) {
+        var href     = $link.attr('href');
+        var rel      = $link.attr('rel');
+
+        const urlP = url.parse(href, true, true);
+        if (urlP.protocol || urlP.host) {
+
+            var donofollow = false;
+
+            metadata.config.pluginData(pluginName).blacklist.forEach(function(re) {
+                if (urlP.hostname.match(re)) {
+                    donofollow = true;
+                }
+            });
+            metadata.config.pluginData(pluginName).whitelist.forEach(function(re) {
+                if (urlP.hostname.match(re)) {
+                    donofollow = false;
+                }
+            });
+
+            if (donofollow) {
+                let linkrel = $link.attr('rel');
+                let rels = linkrel ? linkrel.split(' ') : [];
+                let hasnofollow = false;
+                for (let rel in rels) {
+                    if (rel === 'nofollow') {
+                        hasnofollow = true;
+                    }
+                }
+                if (!hasnofollow) {
+                    if (linkrel && linkrel.length > 0) {
+                        linkrel = "nofollow "+linkrel;
+                    } else {
+                        linkrel = "nofollow";
+                    }
+                    $link.attr('rel', linkrel);
+                }
+            }
+
+
+// TODO  2. Check if an extlink icon is present, if not insert it (if textual link)
+
+
+        } else return Promise.resolve("");
     }
+}
 
-	return module.exports;
-};
+
+/* TODO
+if (! metadata.config.builtin.suppress.extlink
+ && $(link).find("img.ak-extlink-icon").length <= 0) {
+    $(link).append('<img class="ak-extlink-icon" src="/img/extlink.png"/>');
+} */
