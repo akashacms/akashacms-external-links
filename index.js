@@ -45,6 +45,7 @@ module.exports = class ExternalLinksPlugin extends akasha.Plugin {
         config.pluginData(pluginName).blacklist = [];
         config.pluginData(pluginName).whitelist = [];
         config.pluginData(pluginName).preferNofollow = true;
+        config.pluginData(pluginName).showFavicons = undefined;
         config.pluginData(pluginName).targetBlank = false;
         return this;
     }
@@ -68,14 +69,17 @@ module.exports = class ExternalLinksPlugin extends akasha.Plugin {
         config.pluginData(pluginName).targetBlank = blank;
         return this;
     }
+
+    setShowFavicons(config, showspec) {
+        config.pluginData(pluginName).showFavicons = showspec;
+        return this;
+    }
 };
 
 /*
  * TODO
  *
- * 1. Pull in rel=nofollow from wherever it currently resides
  * 2. Support marker icon - before/after
- * 3. Support favicon - before/after
  *
  * These go into akashacms-affiliates:
  *
@@ -137,6 +141,29 @@ class ExternalLinkMunger extends mahabhuta.Munger {
 
             if (metadata.config.pluginData(pluginName).targetBlank) {
                 $link.attr('target', '_blank');
+            }
+
+            if (metadata.config.pluginData(pluginName).showFavicons === "before"
+             || metadata.config.pluginData(pluginName).showFavicons === "after") {
+                let $previous = $link.prev();
+                let $next = $link.next();
+                if (
+                    ($previous && $previous.hasClass('akashacms-external-links-favicon'))
+                 || ($next && $next.hasClass('akashacms-external-links-favicon'))
+                ) {
+                    // skip
+                } else {
+                    let imghtml = `
+                    <img class="akashacms-external-links-favicon"
+                         src="https://www.google.com/s2/favicons?domain=${urlP.hostname}"
+                         style="display: inline-block; padding-right: 4px;"/>
+                    `;
+                    if (metadata.config.pluginData(pluginName).showFavicons === "before") {
+                        $link.before(imghtml);
+                    } else {
+                        $link.after(imghtml);
+                    }
+                }
             }
 
 
