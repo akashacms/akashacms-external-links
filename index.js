@@ -25,11 +25,12 @@ const path     = require('path');
 const util     = require('util');
 const co       = require('co');
 const akasha   = require('akasharender');
+const mahabhuta = require('mahabhuta');
 
 const log   = require('debug')('akasha:extlinks-plugin');
 const error = require('debug')('akasha:error-extlinks-plugin');
 
-const pluginName = "akashacms-extlinks";
+const pluginName = "akashacms-external-links";
 
 module.exports = class ExternalLinksPlugin extends akasha.Plugin {
     constructor() {
@@ -43,14 +44,29 @@ module.exports = class ExternalLinksPlugin extends akasha.Plugin {
 
         config.pluginData(pluginName).blacklist = [];
         config.pluginData(pluginName).whitelist = [];
+        config.pluginData(pluginName).preferNofollow = true;
+        config.pluginData(pluginName).targetBlank = false;
+        return this;
+    }
+
+    setPreferNofollow(config, nofollow) {
+        config.pluginData(pluginName).preferNofollow = nofollow;
+        return this;
     }
 
     addBlacklistEntry(config, entry) {
         config.pluginData(pluginName).blacklist.push(entry);
+        return this;
     }
 
     addWhitelistEntry(config, entry) {
         config.pluginData(pluginName).whitelist.push(entry);
+        return this;
+    }
+
+    setTargetBlank(config, blank) {
+        config.pluginData(pluginName).targetBlank = blank;
+        return this;
     }
 };
 
@@ -73,17 +89,20 @@ module.exports = class ExternalLinksPlugin extends akasha.Plugin {
 
 module.exports.mahabhuta = new mahabhuta.MahafuncArray("akashacms-extlinks", {});
 
-class AnchorCleanup extends mahabhuta.Munger {
+class ExternalLinkMunger extends mahabhuta.Munger {
     get selector() { return "html body a"; }
 
     process($, $link, metadata, dirty, done) {
         var href     = $link.attr('href');
         var rel      = $link.attr('rel');
 
+        if (!href) return Promise.resolve("");
+
+        // We only act on the link if it is external -- has a PROTOCOL and HOST
         const urlP = url.parse(href, true, true);
         if (urlP.protocol || urlP.host) {
 
-            var donofollow = false;
+            var donofollow = metadata.config.pluginData(pluginName).preferNofollow;
 
             metadata.config.pluginData(pluginName).blacklist.forEach(function(re) {
                 if (urlP.hostname.match(re)) {
@@ -100,7 +119,7 @@ class AnchorCleanup extends mahabhuta.Munger {
                 let linkrel = $link.attr('rel');
                 let rels = linkrel ? linkrel.split(' ') : [];
                 let hasnofollow = false;
-                for (let rel in rels) {
+                for (let rel of rels) {
                     if (rel === 'nofollow') {
                         hasnofollow = true;
                     }
@@ -113,15 +132,22 @@ class AnchorCleanup extends mahabhuta.Munger {
                     }
                     $link.attr('rel', linkrel);
                 }
+                // console.log(`akashacms-external-links link ${href} now has rel=${$link.attr('rel')}`);
+            }
+
+            if (metadata.config.pluginData(pluginName).targetBlank) {
+                $link.attr('target', '_blank');
             }
 
 
 // TODO  2. Check if an extlink icon is present, if not insert it (if textual link)
 
+        }
 
-        } else return Promise.resolve("");
+        return Promise.resolve("");
     }
 }
+module.exports.mahabhuta.addMahafunc(new ExternalLinkMunger());
 
 
 /* TODO
