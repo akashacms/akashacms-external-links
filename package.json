@@ -17,7 +17,6 @@
     "node": ">=6.1"
   },
   "dependencies": {
-    "akasharender": "^0.5.14",
     "co": "^4.6.0"
   }
 }

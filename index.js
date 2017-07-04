@@ -81,20 +81,16 @@ module.exports = class ExternalLinksPlugin extends akasha.Plugin {
         config.pluginData(pluginName).showIcon = showspec;
         return this;
     }
+
 };
 
 /*
  * TODO
  *
- * 2. Support marker icon - before/after
- *
  * These go into akashacms-affiliates:
  *
- * 4. Manipulate Amazon links to add affiliate tag
  * 5. Manipulate eBay links to add affiliate tag
  * 6. Manipulate Linkshare links with affiliate coding
- * 7. Ensure all affiliate links get rel=nofollow
- * 8. Support adding rel=noskim
  *
  */
 
@@ -126,25 +122,7 @@ class ExternalLinkMunger extends mahabhuta.Munger {
                 }
             });
 
-            if (donofollow) {
-                let linkrel = $link.attr('rel');
-                let rels = linkrel ? linkrel.split(' ') : [];
-                let hasnofollow = false;
-                for (let rel of rels) {
-                    if (rel === 'nofollow') {
-                        hasnofollow = true;
-                    }
-                }
-                if (!hasnofollow) {
-                    if (linkrel && linkrel.length > 0) {
-                        linkrel = "nofollow "+linkrel;
-                    } else {
-                        linkrel = "nofollow";
-                    }
-                    $link.attr('rel', linkrel);
-                }
-                // console.log(`akashacms-external-links link ${href} now has rel=${$link.attr('rel')}`);
-            }
+            akasha.linkRelSetAttr($link, 'nofollow', donofollow);
 
             if (metadata.config.pluginData(pluginName).targetBlank) {
                 $link.attr('target', '_blank');
