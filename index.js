@@ -128,8 +128,12 @@ class ExternalLinkMunger extends mahabhuta.Munger {
                 $link.attr('target', '_blank');
             }
 
-            if (metadata.config.pluginData(pluginName).showFavicons === "before"
-             || metadata.config.pluginData(pluginName).showFavicons === "after") {
+            // It's ugly to put the icons next to image links
+            let hasImages = $link.find('img').get(0);
+
+            if (!hasImages
+             && (metadata.config.pluginData(pluginName).showFavicons === "before"
+              || metadata.config.pluginData(pluginName).showFavicons === "after")) {
                 let $previous = $link.prev();
                 let $prevprev = $previous.prev();
                 let $next = $link.next();
@@ -156,8 +160,9 @@ class ExternalLinkMunger extends mahabhuta.Munger {
                 }
             }
 
-            if (metadata.config.pluginData(pluginName).showIcon === "before"
-             || metadata.config.pluginData(pluginName).showIcon === "after") {
+            if (!hasImages
+             && (metadata.config.pluginData(pluginName).showIcon === "before"
+              || metadata.config.pluginData(pluginName).showIcon === "after")) {
                 let $previous = $link.prev();
                 let $prevprev = $previous.prev();
                 let $next = $link.next();
