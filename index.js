@@ -70,8 +70,25 @@ module.exports = class ExternalLinksPlugin extends akasha.Plugin {
         return this;
     }
 
+    // We only allow showing EITHER favicon OR icon, but not both at same time
+
     setShowFavicons(config, showspec) {
         config.pluginData(pluginName).showFavicons = showspec;
+        if (showspec
+        && (showspec === "before" || showspec === "after")
+        && config.pluginData(pluginName).showIcon) {
+            config.pluginData(pluginName).showIcon = undefined;
+        }
+        return this;
+    }
+
+    setShowIcon(config, showspec) {
+        config.pluginData(pluginName).showIcon = showspec;
+        if (showspec
+        && (showspec === "before" || showspec === "after")
+        && config.pluginData(pluginName).showFavicons) {
+            config.pluginData(pluginName).showFavicons = undefined;
+        }
         return this;
     }
 };
@@ -156,7 +173,7 @@ class ExternalLinkMunger extends mahabhuta.Munger {
                     let imghtml = `
                     <img class="akashacms-external-links-favicon"
                          src="https://www.google.com/s2/favicons?domain=${urlP.hostname}"
-                         style="display: inline-block; padding-right: 4px;"/>
+                         style="display: inline-block; padding-right: 2px;"/>
                     `;
                     if (metadata.config.pluginData(pluginName).showFavicons === "before") {
                         $link.before(imghtml);
@@ -166,8 +183,28 @@ class ExternalLinkMunger extends mahabhuta.Munger {
                 }
             }
 
-
-// TODO  2. Check if an extlink icon is present, if not insert it (if textual link)
+            if (metadata.config.pluginData(pluginName).showIcon === "before"
+             || metadata.config.pluginData(pluginName).showIcon === "after") {
+                let $previous = $link.prev();
+                let $next = $link.next();
+                if (
+                    ($previous && $previous.hasClass('akashacms-external-links-icon'))
+                 || ($next && $next.hasClass('akashacms-external-links-icon'))
+                ) {
+                    // skip
+                } else {
+                    let imghtml = `
+                    <img class="akashacms-external-links-icon"
+                         src="/img/extlink.png"
+                         style="display: inline-block; padding-right: 2px;"/>
+                    `;
+                    if (metadata.config.pluginData(pluginName).showIcon === "before") {
+                        $link.before(imghtml);
+                    } else {
+                        $link.after(imghtml);
+                    }
+                }
+            }
 
         }
 
