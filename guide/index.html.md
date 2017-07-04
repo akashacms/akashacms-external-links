@@ -1,6 +1,7 @@
 ---
 layout: plugin-documentation.html.ejs
 title: AskashaCMS external-links plugin documentation
+publicationDate: July 4, 2017
 ---
 
 The `akashacms-external-links` plugin provides tools to improve the presentation of external links.  It can control which external links receive `rel=nofollow` and add icons, such as the FAVICON of the target site, next to the link.
@@ -13,7 +14,7 @@ With an AkashaCMS website setup, add the following to `package.json`
 ```
   "dependencies": {
     ...
-    "akashacms-external-links": ">0.6.1",
+    "akashacms-external-links": ">0.6.2",
     ...
   }
 ```
@@ -25,7 +26,7 @@ Once added to `package.json` run: `npm install`
 In `config.js` for the website:
 
 ```
-config.use(require('akashacms-base'));
+config.use(require('akashacms-external-links'));
 ```
 
 There are several configuration settings to go over.
@@ -52,7 +53,7 @@ Leave this off, or set to _never_, if you do not want favicons to display.  Othe
 
 ## Show a simple icon next to destination site
 
-The simple icon is a simple marker that can display next to a link.  Like: <img class="akashacms-external-links-icon" src="/img/extlink.png" style="display: inline-block; padding-right: 2px;"/>
+The simple icon is a simple marker that can display next to a link.  Specifically, this icon: <img class="akashacms-external-links-icon" src="/img/extlink.png" style="display: inline-block; padding-right: 2px;" alt="(external link)"/>
 
 ```
 config.plugin("akashacms-external-links")
@@ -60,10 +61,6 @@ config.plugin("akashacms-external-links")
 ```
 
 Leave this off, or set to _never_, if you do not want the simple icon to display.  Otherwise _after_ means the simple icon is shown after the link, and _before_ means it is shown before.
-
-### We do not support BOTH favicon AND simple icon
-
-As it currently stands you can use one or the other of these icons, but not both.
 
 ## Control whether `rel=nofollow` is added
 
@@ -98,3 +95,16 @@ config
 ```
 
 The sites on _whitelist_ will not receive `rel=nofollow`, and those on _blacklist_ will.
+
+NOTE: These entries are treated as regular expressions, meaning you can do this:
+
+```
+config.plugin("akashacms-external-links")
+    .setTargetBlank(config, true)
+    .setShowFavicons(config, "before")
+    .addBlacklistEntry(config, /wikipedia.org$/i)
+    .addBlacklistEntry(config, /cnn.com$/i)
+    .addBlacklistEntry(config, /nytimes.com$/i)
+    .addBlacklistEntry(config, /amazon.com$/i)
+    .addBlacklistEntry(config, /ebay.com$/i);
+```

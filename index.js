@@ -74,21 +74,11 @@ module.exports = class ExternalLinksPlugin extends akasha.Plugin {
 
     setShowFavicons(config, showspec) {
         config.pluginData(pluginName).showFavicons = showspec;
-        if (showspec
-        && (showspec === "before" || showspec === "after")
-        && config.pluginData(pluginName).showIcon) {
-            config.pluginData(pluginName).showIcon = undefined;
-        }
         return this;
     }
 
     setShowIcon(config, showspec) {
         config.pluginData(pluginName).showIcon = showspec;
-        if (showspec
-        && (showspec === "before" || showspec === "after")
-        && config.pluginData(pluginName).showFavicons) {
-            config.pluginData(pluginName).showFavicons = undefined;
-        }
         return this;
     }
 };
@@ -163,17 +153,22 @@ class ExternalLinkMunger extends mahabhuta.Munger {
             if (metadata.config.pluginData(pluginName).showFavicons === "before"
              || metadata.config.pluginData(pluginName).showFavicons === "after") {
                 let $previous = $link.prev();
+                let $prevprev = $previous.prev();
                 let $next = $link.next();
+                let $nextnext = $next.next();
                 if (
                     ($previous && $previous.hasClass('akashacms-external-links-favicon'))
                  || ($next && $next.hasClass('akashacms-external-links-favicon'))
+                 || ($prevprev && $prevprev.hasClass('akashacms-external-links-favicon'))
+                 || ($nextnext && $nextnext.hasClass('akashacms-external-links-favicon'))
                 ) {
                     // skip
                 } else {
                     let imghtml = `
                     <img class="akashacms-external-links-favicon"
                          src="https://www.google.com/s2/favicons?domain=${urlP.hostname}"
-                         style="display: inline-block; padding-right: 2px;"/>
+                         style="display: inline-block; padding-right: 2px;"
+                         alt="(${urlP.hostname})"/>
                     `;
                     if (metadata.config.pluginData(pluginName).showFavicons === "before") {
                         $link.before(imghtml);
@@ -186,17 +181,22 @@ class ExternalLinkMunger extends mahabhuta.Munger {
             if (metadata.config.pluginData(pluginName).showIcon === "before"
              || metadata.config.pluginData(pluginName).showIcon === "after") {
                 let $previous = $link.prev();
+                let $prevprev = $previous.prev();
                 let $next = $link.next();
+                let $nextnext = $next.next();
                 if (
                     ($previous && $previous.hasClass('akashacms-external-links-icon'))
                  || ($next && $next.hasClass('akashacms-external-links-icon'))
+                 || ($prevprev && $prevprev.hasClass('akashacms-external-links-icon'))
+                 || ($nextnext && $nextnext.hasClass('akashacms-external-links-icon'))
                 ) {
                     // skip
                 } else {
                     let imghtml = `
                     <img class="akashacms-external-links-icon"
                          src="/img/extlink.png"
-                         style="display: inline-block; padding-right: 2px;"/>
+                         style="display: inline-block; padding-right: 2px;"
+                         alt="(external link)"/>
                     `;
                     if (metadata.config.pluginData(pluginName).showIcon === "before") {
                         $link.before(imghtml);
