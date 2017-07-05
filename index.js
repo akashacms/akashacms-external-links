@@ -47,6 +47,7 @@ module.exports = class ExternalLinksPlugin extends akasha.Plugin {
         config.pluginData(pluginName).preferNofollow = true;
         config.pluginData(pluginName).showFavicons = undefined;
         config.pluginData(pluginName).targetBlank = false;
+        config.pluginData(pluginName).externalLinkIcon = undefined;
         return this;
     }
 
@@ -70,8 +71,6 @@ module.exports = class ExternalLinksPlugin extends akasha.Plugin {
         return this;
     }
 
-    // We only allow showing EITHER favicon OR icon, but not both at same time
-
     setShowFavicons(config, showspec) {
         config.pluginData(pluginName).showFavicons = showspec;
         return this;
@@ -79,6 +78,11 @@ module.exports = class ExternalLinksPlugin extends akasha.Plugin {
 
     setShowIcon(config, showspec) {
         config.pluginData(pluginName).showIcon = showspec;
+        return this;
+    }
+
+    setExternalLinkIcon(config, iconurl) {
+        config.pluginData(pluginName).externalLinkIcon = iconurl;
         return this;
     }
 
@@ -140,8 +144,8 @@ class ExternalLinkMunger extends mahabhuta.Munger {
                 let $nextnext = $next.next();
                 if (
                     ($previous && $previous.hasClass('akashacms-external-links-favicon'))
-                 || ($next && $next.hasClass('akashacms-external-links-favicon'))
                  || ($prevprev && $prevprev.hasClass('akashacms-external-links-favicon'))
+                 || ($next && $next.hasClass('akashacms-external-links-favicon'))
                  || ($nextnext && $nextnext.hasClass('akashacms-external-links-favicon'))
                 ) {
                     // skip
@@ -169,15 +173,19 @@ class ExternalLinkMunger extends mahabhuta.Munger {
                 let $nextnext = $next.next();
                 if (
                     ($previous && $previous.hasClass('akashacms-external-links-icon'))
-                 || ($next && $next.hasClass('akashacms-external-links-icon'))
                  || ($prevprev && $prevprev.hasClass('akashacms-external-links-icon'))
+                 || ($next && $next.hasClass('akashacms-external-links-icon'))
                  || ($nextnext && $nextnext.hasClass('akashacms-external-links-icon'))
                 ) {
                     // skip
                 } else {
+                    let iconurl =
+                        metadata.config.pluginData(pluginName).externalLinkIcon
+                        ? metadata.config.pluginData(pluginName).externalLinkIcon
+                        : '/img/extlink.png';
                     let imghtml = `
                     <img class="akashacms-external-links-icon"
-                         src="/img/extlink.png"
+                         src="${iconurl}"
                          style="display: inline-block; padding-right: 2px;"
                          alt="(external link)"/>
                     `;
