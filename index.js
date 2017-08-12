@@ -149,9 +149,9 @@ class ExternalLinkMunger extends mahabhuta.Munger {
                  || ($nextnext && $nextnext.hasClass('akashacms-external-links-favicon'))
                 ) {
                     // skip
-                } else {
+                } else { 
                     let imghtml = `
-                    <img class="akashacms-external-links-favicon"
+                    <img class="akashacms-external-links-favicon opengraph-no-promote"
                          src="https://www.google.com/s2/favicons?domain=${urlP.hostname}"
                          style="display: inline-block; padding-right: 2px;"
                          alt="(${urlP.hostname})"/>
@@ -184,7 +184,7 @@ class ExternalLinkMunger extends mahabhuta.Munger {
                         ? metadata.config.pluginData(pluginName).externalLinkIcon
                         : '/img/extlink.png';
                     let imghtml = `
-                    <img class="akashacms-external-links-icon"
+                    <img class="akashacms-external-links-icon opengraph-no-promote"
                          src="${iconurl}"
                          style="display: inline-block; padding-right: 2px;"
                          alt="(external link)"/>
