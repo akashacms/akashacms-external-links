@@ -25,7 +25,7 @@ const path     = require('path');
 const util     = require('util');
 const co       = require('co');
 const akasha   = require('akasharender');
-const mahabhuta = require('mahabhuta');
+const mahabhuta = akasha.mahabhuta;
 
 const log   = require('debug')('akasha:extlinks-plugin');
 const error = require('debug')('akasha:error-extlinks-plugin');
