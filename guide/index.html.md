@@ -62,6 +62,14 @@ config.plugin("akashacms-external-links")
 
 Leave this off, or set to _never_, if you do not want the simple icon to display.  Otherwise _after_ means the simple icon is shown after the link, and _before_ means it is shown before.
 
+## Suppress the favicon and external link images for specific links
+
+Sometimes the layout of a given link dictates that you cannot use these images with those links.  To suppress the images, simply add the class `akashacms-external-links-suppress-icons` like so:
+
+```
+<a href="URL" class="... akashacms-external-links-suppress-icons ...">TEXT</a>
+```
+
 ## Control whether `rel=nofollow` is added
 
 The `rel=nofollow` tag is very important for at least two reasons:

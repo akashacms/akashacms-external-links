@@ -132,10 +132,16 @@ class ExternalLinkMunger extends mahabhuta.Munger {
                 $link.attr('target', '_blank');
             }
 
+
+            let ignoreImages = false;
+            if ($link.hasClass('akashacms-external-links-suppress-icons')) {
+                ignoreImages = true;
+            }
+
             // It's ugly to put the icons next to image links
             let hasImages = $link.find('img').get(0);
 
-            if (!hasImages
+            if (!hasImages && !ignoreImages
              && (metadata.config.pluginData(pluginName).showFavicons === "before"
               || metadata.config.pluginData(pluginName).showFavicons === "after")) {
                 let $previous = $link.prev();
@@ -164,7 +170,7 @@ class ExternalLinkMunger extends mahabhuta.Munger {
                 }
             }
 
-            if (!hasImages
+            if (!hasImages && !ignoreImages
              && (metadata.config.pluginData(pluginName).showIcon === "before"
               || metadata.config.pluginData(pluginName).showIcon === "after")) {
                 let $previous = $link.prev();
