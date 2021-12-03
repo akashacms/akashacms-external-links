@@ -1,7 +1,7 @@
 
 /**
  *
- * Copyright 2017 David Herron
+ * Copyright 2017, 2018, 2019 David Herron
  *
  * This file is part of AkashaCMS-extlinks (http://akashacms.com/).
  *
@@ -18,200 +18,63 @@
  *  limitations under the License.
  */
 
-'use strict';
-
 const url      = require('url');
 const path     = require('path');
 const util     = require('util');
 const akasha   = require('akasharender');
-const mahabhuta = akasha.mahabhuta;
+const elp_funcs = require('./mahafuncs');
 
-const log   = require('debug')('akasha:extlinks-plugin');
-const error = require('debug')('akasha:error-extlinks-plugin');
+const pluginName = "@akashacms/plugin-external-links";
 
-const pluginName = "akashacms-external-links";
+const _plugin_options = Symbol('options');
 
 module.exports = class ExternalLinksPlugin extends akasha.Plugin {
     constructor() {
         super(pluginName);
     }
 
-    configure(config) {
-        // this._config = config;
+    configure(config, options) {
         config.addAssetsDir(path.join(__dirname, 'assets'));
-        config.addMahabhuta(module.exports.mahabhuta);
-
-        config.pluginData(pluginName).blacklist = [];
-        config.pluginData(pluginName).whitelist = [];
-        config.pluginData(pluginName).preferNofollow = true;
-        config.pluginData(pluginName).showFavicons = undefined;
-        config.pluginData(pluginName).targetBlank = false;
-        config.pluginData(pluginName).externalLinkIcon = undefined;
+        this[_plugin_options] = options;
+        config.addMahabhuta(elp_funcs.mahabhutaArray(this[_plugin_options]));
         return this;
     }
 
+    get options() { return this[_plugin_options]; }
+
     setPreferNofollow(config, nofollow) {
-        config.pluginData(pluginName).preferNofollow = nofollow;
+        this.options.preferNofollow = nofollow;
         return this;
     }
 
     addBlacklistEntry(config, entry) {
-        config.pluginData(pluginName).blacklist.push(entry);
+        this.options.blacklist.push(entry);
         return this;
     }
 
     addWhitelistEntry(config, entry) {
-        config.pluginData(pluginName).whitelist.push(entry);
+        this.options.whitelist.push(entry);
         return this;
     }
 
     setTargetBlank(config, blank) {
-        config.pluginData(pluginName).targetBlank = blank;
+        this.options.targetBlank = blank;
         return this;
     }
 
     setShowFavicons(config, showspec) {
-        config.pluginData(pluginName).showFavicons = showspec;
+        this.options.showFavicons = showspec;
         return this;
     }
 
     setShowIcon(config, showspec) {
-        config.pluginData(pluginName).showIcon = showspec;
+        this.options.showIcon = showspec;
         return this;
     }
 
     setExternalLinkIcon(config, iconurl) {
-        config.pluginData(pluginName).externalLinkIcon = iconurl;
+        this.options.externalLinkIcon = iconurl;
         return this;
     }
 
 };
-
-/*
- * TODO
- *
- * These go into akashacms-affiliates:
- *
- * 5. Manipulate eBay links to add affiliate tag
- * 6. Manipulate Linkshare links with affiliate coding
- *
- */
-
-module.exports.mahabhuta = new mahabhuta.MahafuncArray("akashacms-extlinks", {});
-
-class ExternalLinkMunger extends mahabhuta.Munger {
-    get selector() { return "html body a"; }
-
-    process($, $link, metadata, dirty, done) {
-        var href     = $link.attr('href');
-        var rel      = $link.attr('rel');
-
-        if (!href) return Promise.resolve("");
-
-        // We only act on the link if it is external -- has a PROTOCOL and HOST
-        const urlP = url.parse(href, true, true);
-        if (urlP.protocol || urlP.host) {
-
-            var donofollow = metadata.config.pluginData(pluginName).preferNofollow;
-
-            metadata.config.pluginData(pluginName).blacklist.forEach(function(re) {
-                if (urlP.hostname.match(re)) {
-                    donofollow = true;
-                }
-            });
-            metadata.config.pluginData(pluginName).whitelist.forEach(function(re) {
-                if (urlP.hostname.match(re)) {
-                    donofollow = false;
-                }
-            });
-
-            akasha.linkRelSetAttr($link, 'nofollow', donofollow);
-
-            if (metadata.config.pluginData(pluginName).targetBlank) {
-                $link.attr('target', '_blank');
-            }
-
-
-            let ignoreImages = false;
-            if ($link.hasClass('akashacms-external-links-suppress-icons')) {
-                ignoreImages = true;
-            }
-
-            // It's ugly to put the icons next to image links
-            let hasImages = $link.find('img').get(0);
-
-            if (!hasImages && !ignoreImages
-             && (metadata.config.pluginData(pluginName).showFavicons === "before"
-              || metadata.config.pluginData(pluginName).showFavicons === "after")) {
-                let $previous = $link.prev();
-                let $prevprev = $previous.prev();
-                let $next = $link.next();
-                let $nextnext = $next.next();
-                if (
-                    ($previous && $previous.hasClass('akashacms-external-links-favicon'))
-                 || ($prevprev && $prevprev.hasClass('akashacms-external-links-favicon'))
-                 || ($next && $next.hasClass('akashacms-external-links-favicon'))
-                 || ($nextnext && $nextnext.hasClass('akashacms-external-links-favicon'))
-                ) {
-                    // skip
-                } else { 
-                    let imghtml = `
-                    <img class="akashacms-external-links-favicon opengraph-no-promote"
-                         src="https://www.google.com/s2/favicons?domain=${urlP.hostname}"
-                         style="display: inline-block; padding-right: 2px;"
-                         alt="(${urlP.hostname})"/>
-                    `;
-                    if (metadata.config.pluginData(pluginName).showFavicons === "before") {
-                        $link.before(imghtml);
-                    } else {
-                        $link.after(imghtml);
-                    }
-                }
-            }
-
-            if (!hasImages && !ignoreImages
-             && (metadata.config.pluginData(pluginName).showIcon === "before"
-              || metadata.config.pluginData(pluginName).showIcon === "after")) {
-                let $previous = $link.prev();
-                let $prevprev = $previous.prev();
-                let $next = $link.next();
-                let $nextnext = $next.next();
-                if (
-                    ($previous && $previous.hasClass('akashacms-external-links-icon'))
-                 || ($prevprev && $prevprev.hasClass('akashacms-external-links-icon'))
-                 || ($next && $next.hasClass('akashacms-external-links-icon'))
-                 || ($nextnext && $nextnext.hasClass('akashacms-external-links-icon'))
-                ) {
-                    // skip
-                } else {
-                    let iconurl =
-                        metadata.config.pluginData(pluginName).externalLinkIcon
-                        ? metadata.config.pluginData(pluginName).externalLinkIcon
-                        : '/img/extlink.png';
-                    let imghtml = `
-                    <img class="akashacms-external-links-icon opengraph-no-promote"
-                         src="${iconurl}"
-                         style="display: inline-block; padding-right: 2px;"
-                         alt="(external link)"/>
-                    `;
-                    if (metadata.config.pluginData(pluginName).showIcon === "before") {
-                        $link.before(imghtml);
-                    } else {
-                        $link.after(imghtml);
-                    }
-                }
-            }
-
-        }
-
-        return Promise.resolve("");
-    }
-}
-module.exports.mahabhuta.addMahafunc(new ExternalLinkMunger());
-
-
-/* TODO
-if (! metadata.config.builtin.suppress.extlink
- && $(link).find("img.ak-extlink-icon").length <= 0) {
-    $(link).append('<img class="ak-extlink-icon" src="/img/extlink.png"/>');
-} */

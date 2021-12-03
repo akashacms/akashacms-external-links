@@ -1,0 +1,17 @@
+{
+  "name": "external-links-test",
+  "version": "1.0.0",
+  "description": "Test suite for external-links module",
+  "main": "index.js",
+  "scripts": {
+    "setup": "npm install && cd .. && npm install && npm install akashacms/akasharender#watcher --no-save",
+    "test": "mocha ./index"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chai": "^4.3.x",
+    "cheerio": "^1.0.0-rc.2",
+    "mocha": "^9.1.x"
+  }
+}
