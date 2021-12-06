@@ -40,8 +40,8 @@ module.exports = class ExternalLinksPlugin extends akasha.Plugin {
         if (!this.options.whitelist) this.options.whitelist = [];
         if (!this.options.preferNofollow) this.options.preferNofollow = false;
         if (!this.options.targetBlank) this.options.targetBlank = false;
-        if (!this.array.options.showFavicons) this.array.options.showFavicons = "nowhere";
-        if (!this.array.options.showIcon) this.array.options.showIcon = "nowhere";
+        if (!this.options.showFavicons) this.options.showFavicons = "nowhere";
+        if (!this.options.showIcon) this.options.showIcon = "nowhere";
         config.addMahabhuta(elp_funcs.mahabhutaArray(this[_plugin_options]));
         return this;
     }
