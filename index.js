@@ -38,6 +38,7 @@ module.exports = class ExternalLinksPlugin extends akasha.Plugin {
         this[_plugin_options] = options;
         if (!this.options.blacklist) this.options.blacklist = [];
         if (!this.options.whitelist) this.options.whitelist = [];
+        if (!this.options.preferNofollow) this.options.preferNofollow = false;
         if (!this.options.targetBlank) this.options.targetBlank = false;
         if (!this.array.options.showFavicons) this.array.options.showFavicons = "nowhere";
         if (!this.array.options.showIcon) this.array.options.showIcon = "nowhere";
