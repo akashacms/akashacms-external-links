@@ -10,9 +10,10 @@ HURM - MahafuncArray constructor can receive a config object that is
 
 const url      = require('url');
 const URL      = require('url').URL;
-const mahabhuta = require('mahabhuta');
+const akasha   = require('akasharender');
+const mahabhuta = akasha.mahabhuta;
 
-const pluginName = "@akashacms/external-affiliate-link-processor";
+const pluginName = "@akashacms/plugin-external-links";
 
 module.exports.process = async function(text, metadata, options) {
     let funcs = module.exports.mahabhutaArray(options);
