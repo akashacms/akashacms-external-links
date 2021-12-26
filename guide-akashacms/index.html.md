@@ -1,10 +1,10 @@
 ---
 layout: plugin-documentation.html.ejs
 title: AskashaCMS external-links plugin documentation
-publicationDate: March 31, 2019
+publicationDate: December 26, 2021
 ---
 
-The `@akashacms/plugin-external-links` plugin provides tools to improve the presentation of external links.  It can control which external links receive `rel=nofollow` and add icons, such as the FAVICON of the target site, next to the link.
+The `@akashacms/plugins-external-links` plugin provides tools to improve the presentation of external links.  It can control which external links receive `rel=nofollow` and add icons, such as the FAVICON of the target site, next to the link.
 
 # Installation
 
@@ -13,7 +13,7 @@ With an AkashaCMS website setup, add the following to `package.json`
 ```json
 "dependencies": {
     ...
-    "@akashacms/plugin-external-links": ">0.6.2",
+    "@akashacms/plugins-external-links": ">0.8.x",
     ...
 }
 ```
@@ -25,7 +25,7 @@ Once added to `package.json` run: `npm install`
 In the `config.js` for the website:
 
 ```js
-config.use(require('@akashacms/plugin-external-links'), {
+config.use(require('@akashacms/plugins-external-links'), {
     // options
 });
 ```

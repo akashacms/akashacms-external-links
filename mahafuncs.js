@@ -13,7 +13,7 @@ const URL      = require('url').URL;
 const akasha   = require('akasharender');
 const mahabhuta = akasha.mahabhuta;
 
-const pluginName = "@akashacms/plugin-external-links";
+const pluginName = "@akashacms/plugins-external-links";
 
 module.exports.process = async function(text, metadata, options) {
     let funcs = module.exports.mahabhutaArray(options);

@@ -24,7 +24,7 @@ const util     = require('util');
 const akasha   = require('akasharender');
 const elp_funcs = require('./mahafuncs');
 
-const pluginName = "@akashacms/plugin-external-links";
+const pluginName = "@akashacms/plugins-external-links";
 
 const _plugin_options = Symbol('options');
 

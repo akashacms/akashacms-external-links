@@ -1,10 +1,10 @@
 ---
 layout: plugin-documentation.html.ejs
 title: Mahabhuta @akashacms/plugin-external-links plugin documentation
-publicationDate: March 31, 2019
+publicationDate: December 26, 2021
 ---
 
-The `@akashacms/plugin-external-links` plugin provides tools to improve the presentation of external links (a.k.a. outbound links).  It can control which external links receive `rel=nofollow` and add icons, such as the FAVICON of the target site, next to the link, and also automate adding affiliate tags to the link.
+The `@akashacms/plugins-external-links` plugin provides tools to improve the presentation of external links (a.k.a. outbound links).  It can control which external links receive `rel=nofollow` and add icons, such as the FAVICON of the target site, next to the link, and also automate adding affiliate tags to the link.
 
 While this package is part of AkashaCMS, the Mahafuncs can be used on their own outside of AkashaCMS.  The documentation in this file describes how to use these functions on their own.
 
@@ -15,7 +15,7 @@ With an AkashaCMS website setup, add the following to `package.json`
 ```json
   "dependencies": {
     ...
-    "@akashacms/plugin-external-links": ">0.6.2",
+    "@akashacms/plugins-external-links": ">0.8.x",
     ...
   }
 ```
@@ -27,7 +27,7 @@ Once added to `package.json` run: `npm install`
 To use this package stand-alone:
 
 ```js
-const processor = require('@akashacms/plugin-external-links/mahafuncs');
+const processor = require('@akashacms/plugins-external-links/mahafuncs');
 
 async function doOutboundLinksProcessing(html, metadata) {
     return await processor.process(html, metadata, {
@@ -43,7 +43,7 @@ It's also possible to use this package along with other MahabhutaArray's in a mo
 
 ```js
 const mahabhuta = require('mahabhuta');
-const processor = require('@akashacms/plugin-external-links/mahafuncs');
+const processor = require('@akashacms/plugins-external-links/mahafuncs');
 const partial = require('mahabhuta/maha/partial');
 ...
 

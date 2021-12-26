@@ -1,10 +1,10 @@
 ---
 layout: plugin-documentation.html.ejs
 title: AskashaCMS external-links plugin documentation
-publicationDate: July 4, 2017
+publicationDate: December 26, 2021
 ---
 
-The `akashacms-external-links` plugin provides tools to improve the presentation of external links.  It can control which external links receive `rel=nofollow` and add icons, such as the FAVICON of the target site, next to the link.
+The `@akashacms/plugins-external-links` plugin provides tools to improve the presentation of external links.  It can control which external links receive `rel=nofollow` and add icons, such as the FAVICON of the target site, next to the link.
 
 
 # Installation
@@ -14,7 +14,7 @@ With an AkashaCMS website setup, add the following to `package.json`
 ```
   "dependencies": {
     ...
-    "akashacms-external-links": ">0.6.2",
+    "@akashacms/plugins-external-links": "^0.8.x",
     ...
   }
 ```
@@ -25,8 +25,8 @@ Once added to `package.json` run: `npm install`
 
 In `config.js` for the website:
 
-```
-config.use(require('akashacms-external-links'));
+```js
+config.use(require('@akashacms/plugins-external-links'));
 ```
 
 There are several configuration settings to go over.
@@ -35,8 +35,8 @@ There are several configuration settings to go over.
 
 Often we want our visitors who click on a link to have it open in a new tab, so that they don't exit our site.  
 
-```
-config.plugin("akashacms-external-links")
+```js
+config.plugin("@akashacms/plugins-external-links")
     .setTargetBlank(config, true)
 ```
 
@@ -44,8 +44,8 @@ config.plugin("akashacms-external-links")
 
 The _favicon_ is that icon displayed in the browser location bar or elsewhere.  It's a little image that adds significantly to the users ability to recognize the link points to an external site, and what that site is.  For example:  https://cnn.com
 
-```
-config.plugin("akashacms-external-links")
+```js
+config.plugin("@akashacms/plugins-external-links")
     .setShowFavicons(config, "after|before|never")
 ```
 
@@ -55,8 +55,8 @@ Leave this off, or set to _never_, if you do not want favicons to display.  Othe
 
 The simple icon is a simple marker that can display next to a link.  Specifically, this icon: <img class="akashacms-external-links-icon" src="/img/extlink.png" style="display: inline-block; padding-right: 2px;" alt="(external link)"/>
 
-```
-config.plugin("akashacms-external-links")
+```js
+config.plugin("@akashacms/plugins-external-links")
     .setShowIcon(config, "after|before|never")
 ```
 
@@ -66,7 +66,7 @@ Leave this off, or set to _never_, if you do not want the simple icon to display
 
 Sometimes the layout of a given link dictates that you cannot use these images with those links.  To suppress the images, simply add the class `akashacms-external-links-suppress-icons` like so:
 
-```
+```html
 <a href="URL" class="... akashacms-external-links-suppress-icons ...">TEXT</a>
 ```
 
@@ -80,8 +80,8 @@ The `rel=nofollow` tag is very important for at least two reasons:
 
 For this feature we have three settings:
 
-```
-config.plugin("akashacms-external-links")
+```js
+config.plugin("@akashacms/plugins-external-links")
     .setPreferNofollow(config, true|false)
 ```
 
@@ -89,8 +89,8 @@ This flag controls the default `rel=nofollow` behavior.  If `true` your outbound
 
 Whitelist?  Blacklist?
 
-```
-config
+```js
+config.plugin('@akashacms/plugins-external-links')
     .addBlacklistEntry(config, 'google.com')
     .addBlacklistEntry(config, 'docs.google.com')
     .addBlacklistEntry(config, 'cnn.com')
@@ -106,8 +106,8 @@ The sites on _whitelist_ will not receive `rel=nofollow`, and those on _blacklis
 
 NOTE: These entries are treated as regular expressions, meaning you can do this:
 
-```
-config.plugin("akashacms-external-links")
+```js
+config.plugin("@akashacms/plugins-external-links")
     .setTargetBlank(config, true)
     .setShowFavicons(config, "before")
     .addBlacklistEntry(config, /wikipedia.org$/i)
