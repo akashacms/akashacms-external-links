@@ -22,7 +22,7 @@ import url from 'node:url';
 import path from 'node:path';
 import util from 'node:util';
 import akasha from 'akasharender';
-const elp_funcs = require('./mahafuncs');
+import * as elp_funcs from './mahafuncs.mjs';
 
 const __dirname = import.meta.dirname;
 
