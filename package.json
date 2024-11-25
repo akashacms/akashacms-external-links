@@ -11,13 +11,14 @@
     "type": "git",
     "url": "git://github.com/akashacms/akashacms-external-links.git"
   },
-  "main": "index.js",
+  "main": "index.mjs",
+  "type": "module",
   "version": "0.8.0",
   "scripts": {
     "dopublish": "npm publish --access public"
   },
   "engines": {
-    "node": ">=12.1"
+    "node": ">=20.x"
   },
   "dependencies": {
   }

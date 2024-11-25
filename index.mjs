@@ -18,17 +18,19 @@
  *  limitations under the License.
  */
 
-const url      = require('url');
-const path     = require('path');
-const util     = require('util');
-const akasha   = require('akasharender');
+import url from 'node:url';
+import path from 'node:path';
+import util from 'node:util';
+import akasha from 'akasharender';
 const elp_funcs = require('./mahafuncs');
+
+const __dirname = import.meta.dirname;
 
 const pluginName = "@akashacms/plugins-external-links";
 
 const _plugin_options = Symbol('options');
 
-module.exports = class ExternalLinksPlugin extends akasha.Plugin {
+export class ExternalLinksPlugin extends akasha.Plugin {
     constructor() {
         super(pluginName);
     }

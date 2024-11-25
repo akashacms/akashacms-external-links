@@ -8,19 +8,20 @@ HURM - MahafuncArray constructor can receive a config object that is
         currently unused.  What if the there was a method to inject that 
         config into the Mahafunc object? */
 
-const url      = require('url');
-const URL      = require('url').URL;
-const akasha   = require('akasharender');
+import url, { URL } from 'node:url';
+import akasha from 'akasharender';
 const mahabhuta = akasha.mahabhuta;
+
+const __dirname = import.meta.dirname;
 
 const pluginName = "@akashacms/plugins-external-links";
 
-module.exports.process = async function(text, metadata, options) {
-    let funcs = module.exports.mahabhutaArray(options);
+export async function process(text, metadata, options) {
+    let funcs = mahabhutaArray(options);
     return await mahabhuta.processAsync(text, metadata, funcs);
 };
 
-module.exports.mahabhutaArray = function(options) {
+export function mahabhutaArray(options) {
     let ret = new mahabhuta.MahafuncArray(pluginName, options);
     ret.addMahafunc(new ExternalLinkMunger());
     return ret;
