@@ -9,7 +9,12 @@ HURM - MahafuncArray constructor can receive a config object that is
         config into the Mahafunc object? */
 
 import url, { URL } from 'node:url';
-import akasha from 'akasharender';
+import akasha, {
+    Configuration,
+    CustomElement,
+    Munger,
+    PageProcessor
+} from 'akasharender';
 const mahabhuta = akasha.mahabhuta;
 
 const __dirname = import.meta.dirname;
@@ -21,9 +26,14 @@ export async function process(text, metadata, options) {
     return await mahabhuta.processAsync(text, metadata, funcs);
 };
 
-export function mahabhutaArray(options) {
+export function mahabhutaArray(
+    options,
+    config, // ?: Configuration,
+    akasha, // ?: any,
+    plugin  // ?: Plugin
+) {
     let ret = new mahabhuta.MahafuncArray(pluginName, options);
-    ret.addMahafunc(new ExternalLinkMunger());
+    ret.addMahafunc(new ExternalLinkMunger(config, akasha, plugin));
     return ret;
 };
 
@@ -75,7 +85,7 @@ externalLinkIcon */
     }
 };
 
-class ExternalLinkMunger extends mahabhuta.Munger {
+class ExternalLinkMunger extends Munger {
     get selector() { return "html body a"; }
 
     async process($, $link, metadata, dirty) {
@@ -90,14 +100,14 @@ class ExternalLinkMunger extends mahabhuta.Munger {
         const urlP = url.parse(href, true, true);
         if (urlP.protocol || urlP.host) {
 
-            var donofollow = this.array.options.preferNofollow;
+            var donofollow = this.options.preferNofollow;
 
-            if (this.array.options.blacklist) this.array.options.blacklist.forEach(function(re) {
+            if (this.options.blacklist) this.options.blacklist.forEach(function(re) {
                 if (urlP.hostname.match(re)) {
                     donofollow = true;
                 }
             });
-            if (this.array.options.whitelist) this.array.options.whitelist.forEach(function(re) {
+            if (this.options.whitelist) this.options.whitelist.forEach(function(re) {
                 if (urlP.hostname.match(re)) {
                     donofollow = false;
                 }
@@ -105,7 +115,7 @@ class ExternalLinkMunger extends mahabhuta.Munger {
 
             linkRelSetAttr($link, 'nofollow', donofollow);
 
-            if (this.array.options.targetBlank) {
+            if (this.options.targetBlank) {
                 $link.attr('target', '_blank');
             }
 
@@ -113,16 +123,16 @@ class ExternalLinkMunger extends mahabhuta.Munger {
             let hasImages = $link.find('img').get(0);
 
             if (! $link.hasClass('akashacms-external-links-suppress-icons')) {
-                if (!hasImages && typeof this.array.options.showFavicons !== 'undefined') {
+                if (!hasImages && typeof this.options.showFavicons !== 'undefined') {
                     this.showFavicons($link, urlP);
                 }
 
-                if (!hasImages && typeof this.array.options.showIcon !== 'undefined') {
+                if (!hasImages && typeof this.options.showIcon !== 'undefined') {
                     this.showExternalLinkIcon($link);
                 }
             }
 
-            if (typeof this.array.options.affiliateDomains !== 'undefined') {
+            if (typeof this.options.affiliateDomains !== 'undefined') {
                 this.handleAffiliateCodes($link, urlP);
             }
 
@@ -133,8 +143,8 @@ class ExternalLinkMunger extends mahabhuta.Munger {
 
     showFavicons($link, urlP) {
 
-        if (this.array.options.showFavicons === "before"
-         || this.array.options.showFavicons === "after") {
+        if (this.options.showFavicons === "before"
+         || this.options.showFavicons === "after") {
            let $previous = $link.prev();
            let $prevprev = $previous.prev();
            let $next = $link.next();
@@ -153,7 +163,7 @@ class ExternalLinkMunger extends mahabhuta.Munger {
                     style="display: inline-block; padding-right: 2px;"
                     alt="(${urlP.hostname})"/>
                `;
-               if (this.array.options.showFavicons === "before") {
+               if (this.options.showFavicons === "before") {
                    $link.before(imghtml);
                } else {
                    $link.after(imghtml);
@@ -164,8 +174,8 @@ class ExternalLinkMunger extends mahabhuta.Munger {
 
     showExternalLinkIcon($link) {
 
-        if (this.array.options.showIcon === "before"
-         || this.array.options.showIcon === "after") {
+        if (this.options.showIcon === "before"
+         || this.options.showIcon === "after") {
             let $previous = $link.prev();
             let $prevprev = $previous.prev();
             let $next = $link.next();
@@ -180,8 +190,8 @@ class ExternalLinkMunger extends mahabhuta.Munger {
             } else {
                 // TODO where to store this icon?  Maybe force it to be set.
                 let iconurl =
-                    this.array.options.externalLinkIcon
-                    ? this.array.options.externalLinkIcon
+                    this.options.externalLinkIcon
+                    ? this.options.externalLinkIcon
                     : '/img/extlink.png';
                 let imghtml = `
                 <img class="akashacms-external-links-icon opengraph-no-promote"
@@ -189,7 +199,7 @@ class ExternalLinkMunger extends mahabhuta.Munger {
                         style="display: inline-block; padding-right: 2px;"
                         alt="(external link)"/>
                 `;
-                if (this.array.options.showIcon === "before") {
+                if (this.options.showIcon === "before") {
                     $link.before(imghtml);
                 } else {
                     $link.after(imghtml);
@@ -199,7 +209,7 @@ class ExternalLinkMunger extends mahabhuta.Munger {
     }
 
     handleAffiliateCodes($link, urlP) {
-        for (let aff of this.array.options.affiliateDomains) {
+        for (let aff of this.options.affiliateDomains) {
             if (aff.domain
              && urlP.hostname
              && urlP.hostname.toLowerCase().endsWith(aff.domain)) {
