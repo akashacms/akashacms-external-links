@@ -18,35 +18,40 @@
  *  limitations under the License.
  */
 
-const url      = require('url');
-const path     = require('path');
-const util     = require('util');
-const akasha   = require('akasharender');
-const elp_funcs = require('./mahafuncs');
+import path from 'node:path';
+import util from 'node:util';
+import akasha from 'akasharender';
+import * as elp_funcs from './mahafuncs.mjs';
+
+const __dirname = import.meta.dirname;
 
 const pluginName = "@akashacms/plugins-external-links";
 
-const _plugin_options = Symbol('options');
-
-module.exports = class ExternalLinksPlugin extends akasha.Plugin {
+export class ExternalLinksPlugin extends akasha.Plugin {
     constructor() {
         super(pluginName);
     }
 
+    #config;
+
     configure(config, options) {
         config.addAssetsDir(path.join(__dirname, 'assets'));
-        this[_plugin_options] = options;
+        this.#config = config;
+        // this.config = config;
+        this.akasha = config.akasha;
+        this.options = options ? options : {};
+        this.options.config = config;
         if (!this.options.blacklist) this.options.blacklist = [];
         if (!this.options.whitelist) this.options.whitelist = [];
         if (!this.options.preferNofollow) this.options.preferNofollow = false;
         if (!this.options.targetBlank) this.options.targetBlank = false;
         if (!this.options.showFavicons) this.options.showFavicons = "nowhere";
         if (!this.options.showIcon) this.options.showIcon = "nowhere";
-        config.addMahabhuta(elp_funcs.mahabhutaArray(this[_plugin_options]));
+        config.addMahabhuta(elp_funcs.mahabhutaArray(this.options, this.config, this.akasha, this));
         return this;
     }
 
-    get options() { return this[_plugin_options]; }
+    get config() { return this.#config; }
 
     setPreferNofollow(config, nofollow) {
         this.options.preferNofollow = nofollow;
